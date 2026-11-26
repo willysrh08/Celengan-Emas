@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'login_page.dart';
+import 'login.dart';
 import 'signup_page.dart';
 
 class WelcomePage extends StatelessWidget {
@@ -65,8 +65,8 @@ class WelcomePage extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              child: Image.network(
-                                'https://lh3.googleusercontent.com/aida-public/AB6AXuCY4R1_JS0fNirb0m1yh1mkxR-srO2XVn8eT4wia6LbE-XI6NBvACxfh14a9EDM8omOdqXg_0GlO6fXYdg7liP8KDD46yGK9BakLC5gJWbSK9PfdezUAXdABp3IopZp_5CQPfIfa4hNktB4GoCxmgw095fAgNCj4hg_R9fLU9SVzIjyAZ5x3Z7_y567Kv0zlp__d_mshmZPk1csVfScUerLkd5EZlocoHwSDJT1zuPuS9rz2EraprHAe_Ih-mrED-7aOg',
+                              child: Image.asset(
+                                'assets/logo_celengan_emas.png',
                                 fit: BoxFit.contain,
                               ),
                             ),
@@ -203,33 +203,6 @@ class WelcomePage extends StatelessWidget {
                         ),
                         const SizedBox(height: 16),
 
-                        // Guest / Direct Market Overview Link
-                        TextButton(
-                          onPressed: () {},
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                            backgroundColor: Colors.transparent,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(99),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: const [
-                              Text(
-                                'Cek Harga Emas Hari Ini',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFFF2CA50),
-                                ),
-                              ),
-                              SizedBox(width: 4),
-                              Text('→', style: TextStyle(fontSize: 14, color: Color(0xFFF2CA50))),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 32),
 
                         // Security & Legal Compliance Footer
                         Row(

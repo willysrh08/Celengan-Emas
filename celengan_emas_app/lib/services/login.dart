@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'main.dart';
+import 'package:celengan_emas_app/main.dart' hide SignUpPage;
 import 'signup_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -34,8 +34,8 @@ class _LoginPageState extends State<LoginPage> {
                       shape: BoxShape.circle,
                     ),
                   ),
-                  Image.network(
-                    'https://lh3.googleusercontent.com/aida-public/AB6AXuBKqAVzg_ufcMmk3RWGDeZ6NstSiF29QlgD7FcO7AQHrkVDea9o1jRXHYUKubuyXYIOrSUTHQxT2F95O3NUeFai-1sgSy71F6O4GtBEWA82rhob2Isfe-IXl5A-h6Um8FVJcjzNvSFxXRzGAWWSII_sMxAsksDVouZghO6QqSzrKuSYTYBaL0-vd5AGmjh3UQB4H8y8fGnegLdhjWlt_sKjiV631ZxTy-eHM4UlQ1HfWaaorjqAhirE41RRK3nCUeCPfw',
+                  Image.asset(
+                    'assets/logo_celengan_emas.png',
                     width: 80,
                     height: 80,
                     fit: BoxFit.contain,

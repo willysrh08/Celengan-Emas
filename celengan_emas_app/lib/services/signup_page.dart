@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'main.dart'; // Diperlukan untuk navigasi kembali ke HomeScreen
+import 'package:celengan_emas_app/main.dart'; // Diperlukan untuk navigasi kembali ke HomeScreen
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -33,8 +33,8 @@ class _SignUpPageState extends State<SignUpPage> {
                       shape: BoxShape.circle,
                     ),
                   ),
-                  Image.network(
-                    'https://lh3.googleusercontent.com/aida-public/AB6AXuAAcIuspAIgIHmsFy3cCpAPlYgDZzt5Bln7Bf-VK1mjOgqSvR_pDTbfRU8pf364H22EIaOzTqNyXn3vkeTTncWaKcJ6jUKRYk8JEBrjsXftZS9I9Ie-R-3jw2SlVi8tWgLtx4ACeIgHqDeLKiLrJd_NSPt0NgH6ca_tqasLAei-pFxGuoZGDc3-jbYl8ZVDGxXQ7kNXS6f9UGsGmgxWvs0yxrruKjaF62VOooEa0HERfjYM_Z5e68SO4N7682Lwvwp6Staa9FJfKGvVcA',
+                  Image.asset(
+                    'assets/logo_celengan_emas.png',
                     width: 80,
                     height: 80,
                     fit: BoxFit.contain,

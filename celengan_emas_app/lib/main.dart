@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+import 'services/login.dart';
+
 void main() => runApp(const CelenganEmasApp());
 
 // ==========================================
@@ -55,7 +57,7 @@ class WelcomePage extends StatelessWidget {
                 text: 'Masuk ke Akun →',
                 bgColor: Colors.amber.shade400,
                 fgColor: Colors.black,
-                onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomeScreen())),
+                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginPage())),
               ),
               const SizedBox(height: 12),
               _buildButton(
@@ -66,10 +68,6 @@ class WelcomePage extends StatelessWidget {
                 onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SignUpPage())),
               ),
               const SizedBox(height: 24),
-              TextButton(
-                onPressed: () {},
-                child: const Text('Cek Harga Emas Hari Ini →', style: TextStyle(color: Colors.amber, fontSize: 13, fontWeight: FontWeight.w500)),
-              ),
               const SizedBox(height: 16),
               const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -95,7 +93,14 @@ class WelcomePage extends StatelessWidget {
         border: Border.all(color: Colors.amber.shade400, width: 1.5),
         boxShadow: [BoxShadow(color: Colors.amber.withOpacity(0.15), blurRadius: 25, spreadRadius: 5)],
       ),
-      child: const Center(child: Text('CE', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.amber, letterSpacing: 2))),
+      child: Center(
+        child: Image.asset(
+          'assets/logo_celengan_emas.png',
+          width: 64,
+          height: 64,
+          fit: BoxFit.contain,
+        ),
+      ),
     );
   }
 
