@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    'whatsapp' => [
+        'endpoint' => env('WHATSAPP_ENDPOINT'),
+        'token' => env('WHATSAPP_TOKEN'),
+        'from' => env('WHATSAPP_FROM'),
+        'connect_timeout' => (int) env('WHATSAPP_CONNECT_TIMEOUT', 3),
+        'timeout' => (int) env('WHATSAPP_TIMEOUT', 10),
+    ],
+
 ];

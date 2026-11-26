@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import 'services/login.dart';
+import 'services/welcome_page.dart' as services_welcome;
 
 void main() => runApp(const CelenganEmasApp());
 
@@ -22,7 +23,7 @@ class CelenganEmasApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color(0xFF121315),
         primaryColor: const Color(0xFFF2CA50),
       ),
-      home: const WelcomePage(),
+      home: const services_welcome.WelcomePage(),
     );
   }
 }

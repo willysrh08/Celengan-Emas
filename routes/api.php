@@ -1,8 +1,14 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/send-otp', [AuthController::class, 'sendOtp'])->middleware('throttle:10,1');
+Route::post('/verify-otp', [AuthController::class, 'verifyOtp'])->middleware('throttle:10,1');
+
+Route::middleware('auth:sanctum')->group(function (): void {
+    Route::get('/user', [AuthController::class, 'user']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+});

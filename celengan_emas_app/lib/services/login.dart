@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
 import 'package:celengan_emas_app/main.dart' hide SignUpPage;
+import 'api_service.dart';
 import 'signup_page.dart';
+import 'welcome_page.dart' as welcome;
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -12,6 +16,130 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   String _currentMethod = 'wa'; // 'wa' atau 'email'
 
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final List<TextEditingController> _pinControllers =
+      List.generate(4, (_) => TextEditingController());
+  final List<FocusNode> _pinFocusNodes = List.generate(4, (_) => FocusNode());
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _phoneController.dispose();
+    _emailController.dispose();
+    for (final controller in _pinControllers) {
+      controller.dispose();
+    }
+    for (final focusNode in _pinFocusNodes) {
+      focusNode.dispose();
+    }
+    super.dispose();
+  }
+
+  void _showMessage(String message) {
+    if (!mounted) {
+      return;
+    }
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(color: Color(0xFFE3E2E5), fontSize: 12),
+        ),
+        backgroundColor: const Color(0xFF292A2C),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  bool _isValidEmail(String email) {
+    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
+  }
+
+  void _handlePinChanged(int index, String value) {
+    final digits = value.replaceAll(RegExp(r'\D'), '');
+    if (digits.isNotEmpty && index < _pinControllers.length - 1) {
+      _pinFocusNodes[index + 1].requestFocus();
+    }
+  }
+
+  String? _validateInput() {
+    if (_currentMethod == 'wa') {
+      final phone = ApiService.normalizePhone(_phoneController.text);
+      if (phone.length < 10 || phone.length > 15) {
+        return 'Nomor WhatsApp tidak valid. Gunakan 10–15 digit angka.';
+      }
+    } else {
+      final email = _emailController.text.trim();
+      if (email.isEmpty) {
+        return 'Alamat email wajib diisi.';
+      }
+      if (!_isValidEmail(email)) {
+        return 'Format alamat email tidak valid.';
+      }
+    }
+
+    final pin = _pinControllers.map((controller) => controller.text).join();
+    if (pin.length != 4) {
+      return 'PIN keamanan harus 4 digit lengkap.';
+    }
+    return null;
+  }
+
+  void _handleForgotPin() {
+    _showMessage('Silakan hubungi administrator untuk melakukan reset PIN.');
+  }
+
+  void _handleBack() {
+    final navigator = Navigator.of(context);
+    if (Navigator.canPop(context)) {
+      navigator.pop();
+      return;
+    }
+    navigator.push(
+      MaterialPageRoute(builder: (_) => const welcome.WelcomePage()),
+    );
+  }
+
+  Future<void> _handleLogin() async {
+    final validationError = _validateInput();
+    if (validationError != null) {
+      _showMessage(validationError);
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    try {
+      final email = _currentMethod == 'wa'
+          ? ApiService.emailFromPhone(_phoneController.text)
+          : _emailController.text.trim();
+      final pin = _pinControllers.map((controller) => controller.text).join();
+      final result = await ApiService.login(
+        email: email,
+        password: ApiService.passwordFromPin(pin, email),
+      );
+
+      if (!mounted) {
+        return;
+      }
+      _showMessage(result.message);
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        (route) => false,
+      );
+    } on ApiException catch (exception) {
+      _showMessage(exception.message);
+    } catch (_) {
+      _showMessage('Terjadi kesalahan. Silakan coba lagi.');
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,6 +150,20 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              Align(
+                alignment: Alignment.topLeft,
+                child: IconButton(
+                  onPressed: _handleBack,
+                  icon: const Icon(Icons.arrow_back, color: Color(0xFFF2CA50)),
+                  tooltip: 'Kembali',
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints.tightFor(
+                    width: 32,
+                    height: 32,
+                  ),
+                ),
+              ),
+
               // Brand & Mascot Header
               Stack(
                 alignment: Alignment.center,
@@ -194,6 +336,7 @@ class _LoginPageState extends State<LoginPage> {
                               const SizedBox(width: 8),
                               Expanded(
                                 child: TextField(
+                                  controller: _phoneController,
                                   keyboardType: TextInputType.phone,
                                   style: const TextStyle(fontSize: 14, color: Color(0xFFE3E2E5)),
                                   decoration: InputDecoration(
@@ -224,6 +367,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           const SizedBox(height: 8),
                           TextField(
+                            controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
                             style: const TextStyle(fontSize: 14, color: Color(0xFFE3E2E5)),
                             decoration: InputDecoration(
@@ -266,7 +410,7 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                               TextButton(
                                 style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(0, 0)),
-                                onPressed: () {},
+                                onPressed: _handleForgotPin,
                                 child: const Text('Lupa PIN?', style: TextStyle(fontSize: 11, color: Color(0xFFF2CA50), fontWeight: FontWeight.w500)),
                               ),
                             ],
@@ -280,6 +424,10 @@ class _LoginPageState extends State<LoginPage> {
                                 child: SizedBox(
                                   height: 48,
                                   child: TextField(
+                                    controller: _pinControllers[index],
+                                    focusNode: _pinFocusNodes[index],
+                                    onChanged: (value) => _handlePinChanged(index, value),
+                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                                     obscureText: true,
                                     textAlign: TextAlign.center,
                                     keyboardType: TextInputType.number,
@@ -306,13 +454,7 @@ class _LoginPageState extends State<LoginPage> {
                       width: double.infinity,
                       height: 50,
                       child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(builder: (context) => const HomeScreen()),
-                            (route) => false,
-                          );
-                        },
+                        onPressed: _isLoading ? null : _handleLogin,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFF2CA50),
                           foregroundColor: const Color(0xFF241A00),
@@ -338,9 +480,8 @@ class _LoginPageState extends State<LoginPage> {
                         const Text('Belum punya akun?', style: TextStyle(fontSize: 12, color: Color(0xFFD0C5AF))),
                         TextButton(
                           onPressed: () {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(builder: (context) => const SignUpPage()),
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(builder: (_) => const SignUpPage()),
                             );
                           },
                           child: const Row(

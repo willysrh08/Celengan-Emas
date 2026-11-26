@@ -37,6 +37,11 @@ return [
 
     'mailers' => [
 
+        /*
+         | MAIL_URL, when set, overrides the host, port, credentials and scheme
+         | below. Use MAIL_SCHEME=null or "smtp" with port 587 (STARTTLS), or
+         | "smtps" with port 465. Credentials belong in .env, never in Git.
+         */
         'smtp' => [
             'transport' => 'smtp',
             'scheme' => env('MAIL_SCHEME'),
