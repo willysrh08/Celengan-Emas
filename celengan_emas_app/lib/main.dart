@@ -2,7 +2,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-import 'services/login.dart';
+import 'pages/harga_pasar_page.dart';
+import 'pages/koleksi_page.dart';
+import 'pages/profil_page.dart';
+import 'pages/transaksi_page.dart';
 import 'services/welcome_page.dart' as services_welcome;
 
 void main() => runApp(const CelenganEmasApp());
@@ -20,225 +23,65 @@ class CelenganEmasApp extends StatelessWidget {
       title: 'Celengan Emas',
       theme: ThemeData(
         brightness: Brightness.dark,
+        fontFamily: 'PlusJakartaSans',
         scaffoldBackgroundColor: const Color(0xFF121315),
         primaryColor: const Color(0xFFF2CA50),
       ),
+      // Semua halaman dibungkus bingkai HP supaya di layar lebar (browser/laptop)
+      // tampil seukuran handphone, bukan melebar penuh.
+      builder: (context, child) => PhoneFrame(child: child ?? const SizedBox()),
       home: const services_welcome.WelcomePage(),
     );
   }
 }
 
 // ==========================================
-// 1. HALAMAN WELCOME
+// BINGKAI HANDPHONE (ukuran layar dari Figma: 402 x 874)
 // ==========================================
-class WelcomePage extends StatelessWidget {
-  const WelcomePage({super.key});
+class PhoneFrame extends StatelessWidget {
+  const PhoneFrame({super.key, required this.child});
+
+  final Widget child;
+
+  static const double phoneWidth = 402;
+  static const double phoneHeight = 874;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF121315),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Spacer(),
-              _buildLogoContainer(),
-              const SizedBox(height: 24),
-              const Text('CELENGAN EMAS', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.amber, letterSpacing: 2)),
-              const SizedBox(height: 12),
-              const Text('Simpan & Pantau\nInvestasi Emas', textAlign: TextAlign.center, style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white, height: 1.3)),
-              const SizedBox(height: 16),
-              const Text('Pencatat portofolio emas & perhiasan fisik Anda.', textAlign: TextAlign.center, style: TextStyle(fontSize: 14, color: Colors.grey)),
-              const Spacer(),
-              _buildButton(
-                text: 'Masuk ke Akun →',
-                bgColor: Colors.amber.shade400,
-                fgColor: Colors.black,
-                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginPage())),
-              ),
-              const SizedBox(height: 12),
-              _buildButton(
-                text: 'Buat Akun Baru',
-                bgColor: const Color(0xFF1A1A1A),
-                fgColor: Colors.white,
-                borderColor: const Color(0xFF2C2C2C),
-                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SignUpPage())),
-              ),
-              const SizedBox(height: 24),
-              const SizedBox(height: 16),
-              const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.lock_outline, size: 14, color: Colors.grey),
-                  SizedBox(width: 6),
-                  Text('Terenkripsi & Terlindungi', style: TextStyle(color: Colors.grey, fontSize: 12)),
-                ],
-              ),
+    final media = MediaQuery.of(context);
+    final screen = media.size;
+
+    // Di HP asli (layar sempit) aplikasi tetap memenuhi layar seperti biasa.
+    if (screen.width <= 500) return child;
+
+    final height = screen.height - 32 < phoneHeight ? screen.height - 32 : phoneHeight;
+
+    return ColoredBox(
+      color: const Color(0xFF0A0A0B),
+      child: Center(
+        child: Container(
+          width: phoneWidth,
+          height: height,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(40),
+            border: Border.all(color: const Color(0xFF2A2B2E), width: 6),
+            boxShadow: const [
+              BoxShadow(color: Color(0x66000000), blurRadius: 40, offset: Offset(0, 20)),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLogoContainer() {
-    return Container(
-      width: 90, height: 90,
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E1E1E),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.amber.shade400, width: 1.5),
-        boxShadow: [BoxShadow(color: Colors.amber.withOpacity(0.15), blurRadius: 25, spreadRadius: 5)],
-      ),
-      child: Center(
-        child: Image.asset(
-          'assets/logo_celengan_emas.png',
-          width: 64,
-          height: 64,
-          fit: BoxFit.contain,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildButton({required String text, required Color bgColor, required Color fgColor, Color? borderColor, required VoidCallback onPressed}) {
-    return SizedBox(
-      width: double.infinity, height: 52,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: bgColor, foregroundColor: fgColor,
-          side: borderColor != null ? BorderSide(color: borderColor) : BorderSide.none,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          elevation: bgColor == Colors.amber.shade400 ? 4 : 0,
-        ),
-        child: Text(text, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-      ),
-    );
-  }
-}
-
-// ==========================================
-// 2. HALAMAN SIGN UP (DAFTAR AKUN)
-// ==========================================
-class SignUpPage extends StatefulWidget {
-  const SignUpPage({super.key});
-
-  @override
-  State<SignUpPage> createState() => _SignUpPageState();
-}
-
-class _SignUpPageState extends State<SignUpPage> {
-  String _selectedOtpMethod = 'WhatsApp';
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF121315),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF121315), elevation: 0,
-        leading: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), onPressed: () => Navigator.pop(context)),
-        title: const Text('Buat Akun Baru', style: TextStyle(fontSize: 16, color: Colors.white)),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Mulai simpanan & portofolio emas fisik Anda', style: TextStyle(fontSize: 13, color: Colors.grey)),
-            const SizedBox(height: 20),
-            _buildTextField('Nama Lengkap', 'Contoh: Aqwila Pratama'),
-            const SizedBox(height: 16),
-            _buildTextField('Alamat Email', 'Contoh: nama@email.com'),
-            const SizedBox(height: 16),
-            const Text('Nomor WhatsApp', style: TextStyle(fontSize: 12, color: Color(0xFFD0C5AF))),
-            const SizedBox(height: 6),
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 15),
-                  decoration: BoxDecoration(color: const Color(0xFF1F2022), borderRadius: BorderRadius.circular(10)),
-                  child: const Text('🇮🇩 +62', style: TextStyle(color: Colors.white, fontSize: 13)),
-                ),
-                const SizedBox(width: 8),
-                Expanded(child: _buildInputBox('812-3456-7890', keyboardType: TextInputType.phone)),
-              ],
-            ),
-            const SizedBox(height: 16),
-            const Text('Metode Pengiriman OTP', style: TextStyle(fontSize: 12, color: Color(0xFFD0C5AF))),
-            const SizedBox(height: 6),
-            Row(
-              children: ['WhatsApp', 'Email'].map((method) {
-                bool isSelected = _selectedOtpMethod == method;
-                return Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.only(right: method == 'WhatsApp' ? 10 : 0),
-                    child: OutlinedButton(
-                      onPressed: () => setState(() => _selectedOtpMethod = method),
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: isSelected ? const Color(0xFF1F2022) : Colors.transparent,
-                        side: BorderSide(color: isSelected ? Colors.amber : const Color(0xFF2C2C2C)),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
-                      child: Text(method, style: const TextStyle(color: Colors.white)),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity, height: 48,
-              child: OutlinedButton(
-                onPressed: () {},
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Colors.amber),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-                child: Text('Kirim Kode OTP via $_selectedOtpMethod', style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold)),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(34),
+            // Halaman di dalam bingkai "mengira" layarnya selebar HP.
+            child: MediaQuery(
+              data: media.copyWith(
+                size: Size(phoneWidth - 12, height - 12),
+                padding: EdgeInsets.zero,
+                viewPadding: EdgeInsets.zero,
               ),
+              child: child,
             ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity, height: 52,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const HomeScreen()), (_) => false),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFF2CA50), foregroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                child: const Text('Buat Akun Sekarang →', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-              ),
-            ),
-          ],
+          ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildTextField(String label, String hint) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(fontSize: 12, color: Color(0xFFD0C5AF))),
-        const SizedBox(height: 6),
-        _buildInputBox(hint),
-      ],
-    );
-  }
-
-  Widget _buildInputBox(String hint, {TextInputType? keyboardType}) {
-    return TextField(
-      keyboardType: keyboardType,
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: const TextStyle(color: Colors.grey, fontSize: 13),
-        filled: true, fillColor: const Color(0xFF1F2022),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
       ),
     );
   }
@@ -248,7 +91,10 @@ class _SignUpPageState extends State<SignUpPage> {
 // 3. DASHBOARD UTAMA (HOMESCREEN)
 // ==========================================
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.initialIndex = 0});
+
+  /// Tab yang terbuka pertama kali (0 = Beranda).
+  final int initialIndex;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -256,7 +102,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool _isBalanceHidden = false;
-  int _currentIndex = 0;
+  late int _currentIndex = widget.initialIndex;
   final String authToken = "MASUKKAN_TOKEN_SANCTUM_ANDA";
 
   Map<String, dynamic> _dummyData() => {
@@ -285,7 +131,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF121315),
-      appBar: PreferredSize(
+      // Header "Halo, ..." hanya untuk Beranda; tab lain punya judul sendiri.
+      appBar: _currentIndex != 0 ? null : PreferredSize(
         preferredSize: const Size.fromHeight(64),
         child: AppBar(
           backgroundColor: const Color(0xFF121315), elevation: 0, automaticallyImplyLeading: false,
@@ -322,7 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      body: FutureBuilder<Map<String, dynamic>>(
+      body: _currentIndex != 0 ? _buildTab() : FutureBuilder<Map<String, dynamic>>(
         future: fetchGoldData(),
         builder: (context, snapshot) {
           final data = snapshot.data ?? _dummyData();
@@ -501,7 +348,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ]),
                     TextButton(
                       style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(0, 0)),
-                      onPressed: () {},
+                      onPressed: () => setState(() => _currentIndex = 1),
                       child: Row(children: const [
                         Text('Lihat Semua', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFFF2CA50))),
                         Icon(Icons.arrow_forward, size: 14, color: Color(0xFFF2CA50)),
@@ -630,6 +477,20 @@ class _HomeScreenState extends State<HomeScreen> {
       icon: Icon(icon, color: const Color(0xFFF2CA50), size: 18),
       label: Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
     );
+  }
+
+  /// Isi tab selain Beranda (index 1-4 di navigasi bawah).
+  Widget _buildTab() {
+    switch (_currentIndex) {
+      case 1:
+        return const KoleksiPage();
+      case 2:
+        return const TransaksiPage();
+      case 3:
+        return const HargaPasarPage();
+      default:
+        return const ProfilPage();
+    }
   }
 
   Widget _buildNavItem(int index, IconData icon, String label) {
