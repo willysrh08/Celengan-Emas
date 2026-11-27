@@ -128,6 +128,47 @@ class ApiService {
     await _storage.delete(key: tokenKey);
   }
 
+  /// Data akun yang sedang login (GET /api/user). Dipakai di halaman Profil.
+  static Future<Map<String, dynamic>> getUser() async {
+    final token = await readToken();
+    if (token == null) {
+      throw const ApiException('Kamu belum login.');
+    }
+    final http.Response response;
+    try {
+      response = await http.get(
+        Uri.parse('$baseUrl/user'),
+        headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+      ).timeout(_timeout);
+    } catch (_) {
+      throw const ApiException('Tidak dapat terhubung ke server.');
+    }
+    if (response.statusCode != 200) {
+      throw const ApiException('Sesi login berakhir. Silakan masuk lagi.');
+    }
+    final decoded = json.decode(response.body);
+    final data = decoded is Map && decoded['data'] is Map ? decoded['data'] : decoded;
+    final user = data is Map && data['user'] is Map ? data['user'] : data;
+    return Map<String, dynamic>.from(user as Map);
+  }
+
+  /// Keluar dari akun (POST /api/logout) lalu hapus token yang tersimpan.
+  /// Token tetap dihapus walaupun server tidak bisa dihubungi.
+  static Future<void> logout() async {
+    final token = await readToken();
+    if (token != null) {
+      try {
+        await http.post(
+          Uri.parse('$baseUrl/logout'),
+          headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+        ).timeout(_timeout);
+      } catch (_) {
+        // Abaikan: yang penting token di perangkat terhapus.
+      }
+    }
+    await clearToken();
+  }
+
   // Fungsi Mengambil Data Portofolio Emas (Sesuai Halaman Home)
   static Future<Map<String, dynamic>> getGoldAssets(String token) async {
     final response = await http.get(

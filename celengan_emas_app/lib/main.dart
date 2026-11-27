@@ -2,6 +2,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+import 'pages/harga_pasar_page.dart';
+import 'pages/koleksi_page.dart';
+import 'pages/profil_page.dart';
+import 'pages/transaksi_page.dart';
 import 'services/login.dart';
 import 'services/welcome_page.dart' as services_welcome;
 
@@ -304,7 +308,10 @@ class _SignUpPageState extends State<SignUpPage> {
 // 3. DASHBOARD UTAMA (HOMESCREEN)
 // ==========================================
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.initialIndex = 0});
+
+  /// Tab yang terbuka pertama kali (0 = Beranda).
+  final int initialIndex;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -312,7 +319,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool _isBalanceHidden = false;
-  int _currentIndex = 0;
+  late int _currentIndex = widget.initialIndex;
   final String authToken = "MASUKKAN_TOKEN_SANCTUM_ANDA";
 
   Map<String, dynamic> _dummyData() => {
@@ -341,7 +348,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF121315),
-      appBar: PreferredSize(
+      // Header "Halo, ..." hanya untuk Beranda; tab lain punya judul sendiri.
+      appBar: _currentIndex != 0 ? null : PreferredSize(
         preferredSize: const Size.fromHeight(64),
         child: AppBar(
           backgroundColor: const Color(0xFF121315), elevation: 0, automaticallyImplyLeading: false,
@@ -378,7 +386,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      body: FutureBuilder<Map<String, dynamic>>(
+      body: _currentIndex != 0 ? _buildTab() : FutureBuilder<Map<String, dynamic>>(
         future: fetchGoldData(),
         builder: (context, snapshot) {
           final data = snapshot.data ?? _dummyData();
@@ -557,7 +565,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ]),
                     TextButton(
                       style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(0, 0)),
-                      onPressed: () {},
+                      onPressed: () => setState(() => _currentIndex = 1),
                       child: Row(children: const [
                         Text('Lihat Semua', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFFF2CA50))),
                         Icon(Icons.arrow_forward, size: 14, color: Color(0xFFF2CA50)),
@@ -686,6 +694,20 @@ class _HomeScreenState extends State<HomeScreen> {
       icon: Icon(icon, color: const Color(0xFFF2CA50), size: 18),
       label: Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
     );
+  }
+
+  /// Isi tab selain Beranda (index 1-4 di navigasi bawah).
+  Widget _buildTab() {
+    switch (_currentIndex) {
+      case 1:
+        return const KoleksiPage();
+      case 2:
+        return const TransaksiPage();
+      case 3:
+        return const HargaPasarPage();
+      default:
+        return const ProfilPage();
+    }
   }
 
   Widget _buildNavItem(int index, IconData icon, String label) {
