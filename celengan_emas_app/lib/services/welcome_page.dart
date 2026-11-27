@@ -6,6 +6,11 @@ import 'api_service.dart';
 import 'login.dart';
 import 'signup_page.dart';
 
+// Gradasi emas dari Figma: #F2CA50 -> #FFE088 -> #D4AF37 (kiri ke kanan)
+const LinearGradient _goldGradient = LinearGradient(
+  colors: [Color(0xFFF2CA50), Color(0xFFFFE088), Color(0xFFD4AF37)],
+);
+
 class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
 
@@ -44,8 +49,8 @@ class _WelcomePageState extends State<WelcomePage> {
         child: LayoutBuilder(
           builder: (context, viewport) {
             final bool isCompact = viewport.maxWidth < 360;
-            final double logoSize = isCompact ? 92 : 108;
-            final double headlineSize = isCompact ? 24 : 28;
+            final double logoSize = isCompact ? 96 : 112; // Figma: 112 px
+            final double headlineSize = isCompact ? 22 : 24; // Figma: 24 px
 
             return Stack(
               children: [
@@ -96,14 +101,28 @@ class _WelcomePageState extends State<WelcomePage> {
                               _buildBrandLabel(),
                               const SizedBox(height: 14),
                               Text(
-                                'Simpan & Pantau\nInvestasi Emas',
+                                'Simpan & Pantau',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: headlineSize,
                                   fontWeight: FontWeight.bold,
                                   color: _onSurface,
                                   height: 1.25,
-                                  letterSpacing: -0.5,
+                                ),
+                              ),
+                              // "Investasi Emas" bergradasi emas seperti di Figma
+                              ShaderMask(
+                                blendMode: BlendMode.srcIn,
+                                shaderCallback: (bounds) =>
+                                    _goldGradient.createShader(bounds),
+                                child: Text(
+                                  'Investasi Emas',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: headlineSize,
+                                    fontWeight: FontWeight.bold,
+                                    height: 1.25,
+                                  ),
                                 ),
                               ),
                               const SizedBox(height: 12),
@@ -122,9 +141,20 @@ class _WelcomePageState extends State<WelcomePage> {
                               const SizedBox(height: 32),
 
                               // Primary action: masuk ke akun yang sudah ada.
-                              SizedBox(
+                              Container(
                                 width: double.infinity,
-                                height: 54,
+                                height: 52,
+                                decoration: BoxDecoration(
+                                  gradient: _goldGradient,
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Color(0x33F2CA50),
+                                      blurRadius: 20,
+                                      offset: Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
                                 child: ElevatedButton(
                                   onPressed: () {
                                     Navigator.push(
@@ -135,13 +165,13 @@ class _WelcomePageState extends State<WelcomePage> {
                                     );
                                   },
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: _primary,
+                                    backgroundColor: Colors.transparent,
+                                    shadowColor: Colors.transparent,
                                     foregroundColor: const Color(0xFF3C2F00),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
-                                    elevation: 6,
-                                    shadowColor: const Color(0x4DF2CA50),
+                                    elevation: 0,
                                   ),
                                   child: const Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
@@ -149,7 +179,7 @@ class _WelcomePageState extends State<WelcomePage> {
                                       Text(
                                         'Masuk ke Akun',
                                         style: TextStyle(
-                                          fontSize: 15,
+                                          fontSize: 14,
                                           fontWeight: FontWeight.bold,
                                           letterSpacing: 0.2,
                                         ),
@@ -165,7 +195,7 @@ class _WelcomePageState extends State<WelcomePage> {
                               // Secondary action: registrasi akun baru.
                               SizedBox(
                                 width: double.infinity,
-                                height: 50,
+                                height: 48,
                                 child: ElevatedButton(
                                   onPressed: () {
                                     Navigator.push(
@@ -196,7 +226,48 @@ class _WelcomePageState extends State<WelcomePage> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 20),
+                              const SizedBox(height: 16),
+
+                              // Tautan "Cek Harga Emas Hari Ini" dari Figma.
+                              // Halaman harga belum ada, jadi untuk sementara
+                              // menampilkan pemberitahuan.
+                              TextButton(
+                                onPressed: () {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Halaman Harga Emas segera hadir.',
+                                      ),
+                                    ),
+                                  );
+                                },
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'Cek Harga Emas Hari Ini',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: _primary,
+                                      ),
+                                    ),
+                                    SizedBox(width: 4),
+                                    Icon(
+                                      Icons.arrow_forward,
+                                      size: 14,
+                                      color: _primary,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 24),
                               _buildSecurityFooter(),
                             ],
                           ),
@@ -235,11 +306,11 @@ class _WelcomePageState extends State<WelcomePage> {
         Container(
           width: logoSize,
           height: logoSize,
-          padding: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(8),
+          // Kotak logo sesuai Figma: #1B1C1E, sudut 16 px
           decoration: BoxDecoration(
-            color: _surfaceContainerHigh,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: const Color(0x66F2CA50), width: 1.5),
+            color: const Color(0xFF1B1C1E),
+            borderRadius: BorderRadius.circular(16),
             boxShadow: const [
               BoxShadow(
                 color: Color(0x40F2CA50),

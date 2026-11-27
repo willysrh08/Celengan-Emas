@@ -20,10 +20,66 @@ class CelenganEmasApp extends StatelessWidget {
       title: 'Celengan Emas',
       theme: ThemeData(
         brightness: Brightness.dark,
+        fontFamily: 'PlusJakartaSans',
         scaffoldBackgroundColor: const Color(0xFF121315),
         primaryColor: const Color(0xFFF2CA50),
       ),
+      // Semua halaman dibungkus bingkai HP supaya di layar lebar (browser/laptop)
+      // tampil seukuran handphone, bukan melebar penuh.
+      builder: (context, child) => PhoneFrame(child: child ?? const SizedBox()),
       home: const services_welcome.WelcomePage(),
+    );
+  }
+}
+
+// ==========================================
+// BINGKAI HANDPHONE (ukuran layar dari Figma: 402 x 874)
+// ==========================================
+class PhoneFrame extends StatelessWidget {
+  const PhoneFrame({super.key, required this.child});
+
+  final Widget child;
+
+  static const double phoneWidth = 402;
+  static const double phoneHeight = 874;
+
+  @override
+  Widget build(BuildContext context) {
+    final media = MediaQuery.of(context);
+    final screen = media.size;
+
+    // Di HP asli (layar sempit) aplikasi tetap memenuhi layar seperti biasa.
+    if (screen.width <= 500) return child;
+
+    final height = screen.height - 32 < phoneHeight ? screen.height - 32 : phoneHeight;
+
+    return ColoredBox(
+      color: const Color(0xFF0A0A0B),
+      child: Center(
+        child: Container(
+          width: phoneWidth,
+          height: height,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(40),
+            border: Border.all(color: const Color(0xFF2A2B2E), width: 6),
+            boxShadow: const [
+              BoxShadow(color: Color(0x66000000), blurRadius: 40, offset: Offset(0, 20)),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(34),
+            // Halaman di dalam bingkai "mengira" layarnya selebar HP.
+            child: MediaQuery(
+              data: media.copyWith(
+                size: Size(phoneWidth - 12, height - 12),
+                padding: EdgeInsets.zero,
+                viewPadding: EdgeInsets.zero,
+              ),
+              child: child,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
