@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:celengan_emas_app/main.dart' hide SignUpPage;
+import 'package:celengan_emas_app/main.dart';
 import 'api_service.dart';
 import 'signup_page.dart';
 import 'welcome_page.dart' as welcome;
